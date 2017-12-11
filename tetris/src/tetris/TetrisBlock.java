@@ -8,7 +8,7 @@ public abstract class TetrisBlock
 	protected int yPos;
 	protected TetrisGrid grid;
 	protected int[] blockSize = new int[4]; //top, right, left, bottom
-	protected int[][] blockShape = new int[][] {{0,0}};
+	protected int[][] blockShape;
 	
 	public TetrisBlock(TetrisGrid tetrisgrid)
 	{

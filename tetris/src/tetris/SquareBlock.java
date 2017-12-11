@@ -11,6 +11,6 @@ public class SquareBlock extends TetrisBlock
 	}
 	
 	public void rotate()
-	{		
+	{
 	}
 }

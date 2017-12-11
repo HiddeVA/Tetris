@@ -1,30 +1,32 @@
 package tetris;
 
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
+import javafx.scene.canvas.Canvas;
 
 public class TetrisGrid
 {
+	private int cols = 10;
+	private int rows = 17;
 	int score;
-	GraphicsContext gc;
 	boolean[][] grid;
-	double size = 20;
-	double gap = 1;
-	int cols = 10;
-	int rows = 17;
+	GridDrawer gd;
 	
-	public TetrisGrid(GraphicsContext gc)
+	public TetrisGrid(Canvas canvas)
 	{
-		this.gc = gc;
 		grid = new boolean[this.cols][this.rows];
+		gd = new GridDrawer(canvas.getGraphicsContext2D());
 	}
 	
-	public TetrisGrid(GraphicsContext gc, int rows, int cols)
+	public TetrisGrid(Canvas canvas, int rows, int cols)
 	{
-		this.gc = gc;
 		grid = new boolean[cols][rows];
+		gd = new GridDrawer(canvas.getGraphicsContext2D());
 	}
 	
+	public GridDrawer getGridDrawer()
+	{
+		return this.gd;
+	}
+
 	public int getWidth()
 	{
 		return this.cols;
@@ -45,35 +47,6 @@ public class TetrisGrid
 		if (x < 0 || x >= cols || y < 0 || y >= rows)
 			return true;
 		return grid[x][y];
-	}
-	
-	public void drawGrid()
-	{
-		score = 0;
-		gc.setFill(Color.WHITE);
-		gc.fillRect(0, 0, (size + gap) * (cols - 1), (size + gap) * (rows - 1));
-		gc.setFill(Color.BLACK);
-		for (int i = 0; i < grid.length; i++)
-		{
-			for (int j = 0; j < grid[i].length; j++)
-			{
-				gc.fillRect(i * (size + gap), j * (size + gap), size, size);
-			}
-		}
-	}
-	
-	public void drawBlock(int x, int y)
-	{
-		if (x < 0 || y < 0 || x > cols || y > rows) return;
-		gc.setFill(Color.YELLOW);
-		gc.fillRect(x * (size + gap), y * (size + gap), size, size);
-	}
-	
-	public void clearBlock(int x, int y)
-	{
-		if (x < 0 || y < 0 || x > cols || y > rows) return;
-		gc.setFill(Color.BLACK);
-		gc.fillRect(x * (size + gap), y * (size + gap), size, size);
 	}
 	
 	public boolean placeBlock(TetrisBlock block)
@@ -126,16 +99,31 @@ public class TetrisGrid
 			for (int j = 0; j < cols; j++) {
 				if (grid[j][k-1]) {
 					grid[j][k] = true;
-					clearBlock(j, k - 1);
+					gd.clearBlock(j, k - 1);
 					grid[j][k-1] = false;
-					drawBlock(j, k);
+					gd.drawBlock(j, k);
 				}
 				else {
 					grid[j][k] = false;
-					clearBlock(j,k);
+					gd.clearBlock(j,k);
 				}
 			}
 		}
+	}
+	
+	public void clearBlock(int x, int y)
+	{
+		gd.clearBlock(x, y);
+	}
+	
+	public void drawBlock(int x, int y)
+	{
+		gd.drawBlock(x, y);
+	}
+	
+	public void drawGrid()
+	{
+		score = 0;
 	}
 	
 	public void reset()
@@ -145,6 +133,6 @@ public class TetrisGrid
 				grid[i][j] = false;
 			}
 		}
-		drawGrid();
+		gd.drawGrid();
 	}
 }

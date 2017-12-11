@@ -12,12 +12,12 @@ import javafx.stage.Stage;
 
 public class Tetris extends Application
 {
-	Label lblScore;
 	long speed;
 	int speedtimer = 0;
-	GraphicsContext gc;
 	TetrisGrid tetrisgrid;
-	Timer t;
+	GridDrawer drawer;
+	Timer gameTimer;
+	Timer drawTimer;
 	TetrisBlock activeBlock;
 	public enum GameState {GAMEOVER, CONTINUE, NEWBLOCK};
 	boolean isRunning = false;
@@ -40,10 +40,10 @@ public class Tetris extends Application
 		
 		Canvas canvas = new Canvas(240, 360);
 		border.setCenter(canvas);
-		gc = canvas.getGraphicsContext2D();
 		
-		tetrisgrid = new TetrisGrid(gc);
-		tetrisgrid.drawGrid();
+		tetrisgrid = new TetrisGrid(canvas);
+		drawer = tetrisgrid.getGridDrawer();
+		drawer.drawGrid();
 		
 		Scene scene = new Scene(border, 450, 500);
 		scene.setOnKeyPressed(e->{
@@ -51,7 +51,7 @@ public class Tetris extends Application
 				switch (e.getCode()) {
 				case LEFT: activeBlock.moveLeft(); break;
 				case RIGHT: activeBlock.moveRight(); break;
-				case DOWN: while (activeBlock.drop().equals(GameState.CONTINUE)) {} 
+				case DOWN: while (activeBlock.drop() == GameState.CONTINUE) {} 
 					newBlock(); break;
 				case ENTER:
 				case SHIFT:
@@ -68,20 +68,31 @@ public class Tetris extends Application
 	
 	public void startGame()
 	{
-		if (t != null) t.cancel();
+		if (gameTimer != null) gameTimer.cancel();
+		gameTimer = new Timer();
+		if (drawTimer != null) drawTimer.cancel();
+		drawTimer = new Timer();
 		tetrisgrid.reset();
-		t = new Timer();
 		isRunning = true;
 		activeBlock = null;
 		speed = 500;
 		setSpeed(speed);
+		drawTimer.schedule(new drawLoop(), 0, 15);
 	}
 	
 	public void setSpeed(long s)
 	{
-		t.cancel();
-		t = new Timer();
-		t.schedule(new GameLoop(), 0, s);
+		gameTimer.cancel();
+		gameTimer = new Timer();
+		gameTimer.schedule(new GameLoop(), 0, s);
+	}
+	
+	private class drawLoop extends TimerTask
+	{
+		public synchronized void run()
+		{
+			drawer.draw();
+		}
 	}
 	
 	private class GameLoop extends TimerTask
@@ -98,7 +109,8 @@ public class Tetris extends Application
 					newBlock();
 					break;
 				case GAMEOVER:
-					t.cancel();
+					gameTimer.cancel();
+					drawTimer.cancel();
 					isRunning = false;
 					Platform.runLater(new Runnable() {
 					    @Override
@@ -112,7 +124,7 @@ public class Tetris extends Application
 					});
 					break;
 				default:
-				}
+				}				
 			}
 		}
 	}
