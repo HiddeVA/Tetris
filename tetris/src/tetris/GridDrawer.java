@@ -1,7 +1,6 @@
 package tetris;
 
 import javafx.scene.paint.Color;
-
 import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.canvas.GraphicsContext;
@@ -10,8 +9,8 @@ public class GridDrawer
 {
 	private double size = 20;
 	private double gap = 1;
-	private int cols = 10;
-	private int rows = 17;
+	private int cols;
+	private int rows;
 	private GraphicsContext gc;
 	private List<DrawRequest> queue = new ArrayList<DrawRequest>();
 	
@@ -24,9 +23,17 @@ public class GridDrawer
 		this.gc = gc;
 	}
 	
+	public GridDrawer(GraphicsContext gc, int cols, int rows)
+	{
+		this.gc = gc;
+		this.cols = cols;
+		this.rows = rows;
+	}
+	
 	public GridDrawer(GraphicsContext gc)
 	{
 		this.gc = gc;
+		cols = 10; rows = 17;
 	}
 	
 	public void drawGrid()
@@ -55,7 +62,7 @@ public class GridDrawer
 		queue.add(new DrawRequest(x * (size + gap), y * (size + gap), size, Color.BLACK));
 	}
 	
-	public void draw()
+	public synchronized void draw()
 	{
 		for(DrawRequest dReq : queue)
 		{

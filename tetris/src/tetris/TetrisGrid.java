@@ -2,7 +2,7 @@ package tetris;
 
 import javafx.scene.canvas.Canvas;
 
-public class TetrisGrid
+public class TetrisGrid extends Canvas
 {
 	private int cols = 10;
 	private int rows = 17;
@@ -10,16 +10,20 @@ public class TetrisGrid
 	boolean[][] grid;
 	GridDrawer gd;
 	
-	public TetrisGrid(Canvas canvas)
+	public TetrisGrid()
 	{
+		super(240, 360);
 		grid = new boolean[this.cols][this.rows];
-		gd = new GridDrawer(canvas.getGraphicsContext2D());
+		gd = new GridDrawer(this.getGraphicsContext2D(), this.cols, this.rows);
 	}
 	
-	public TetrisGrid(Canvas canvas, int rows, int cols)
+	public TetrisGrid(int rows, int cols)
 	{
+		super(240, 360);
+		this.rows = rows;
+		this.cols = cols;
 		grid = new boolean[cols][rows];
-		gd = new GridDrawer(canvas.getGraphicsContext2D());
+		gd = new GridDrawer(this.getGraphicsContext2D(), cols, rows);
 	}
 	
 	public GridDrawer getGridDrawer()
@@ -27,12 +31,12 @@ public class TetrisGrid
 		return this.gd;
 	}
 
-	public int getWidth()
+	public int getGridWidth()
 	{
 		return this.cols;
 	}
 	
-	public int getHeight()
+	public int getGridHeight()
 	{
 		return this.rows - 1;
 	}
@@ -121,11 +125,6 @@ public class TetrisGrid
 		gd.drawBlock(x, y);
 	}
 	
-	public void drawGrid()
-	{
-		score = 0;
-	}
-	
 	public void reset()
 	{
 		for (int i = 0; i < cols; i ++) {
@@ -134,5 +133,6 @@ public class TetrisGrid
 			}
 		}
 		gd.drawGrid();
+		score = 0;
 	}
 }

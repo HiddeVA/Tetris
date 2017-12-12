@@ -1,10 +1,10 @@
 package tetris;
 
+import java.util.ConcurrentModificationException;
 import java.util.Timer;
 import java.util.TimerTask;
 import javafx.application.*;
 import javafx.scene.*;
-import javafx.scene.canvas.*;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.*;
@@ -21,6 +21,7 @@ public class Tetris extends Application
 	TetrisBlock activeBlock;
 	public enum GameState {GAMEOVER, CONTINUE, NEWBLOCK};
 	boolean isRunning = false;
+	boolean paused = false;
 	
 	public static void main(String[] args)
 	{
@@ -35,13 +36,17 @@ public class Tetris extends Application
 		Menu menuGame = new Menu("Game");
 		menuBar.getMenus().addAll(menuGame);
 		MenuItem miNewGame = new MenuItem("New Game");
-		menuGame.getItems().addAll(miNewGame);
 		miNewGame.setOnAction(e->this.startGame());
-		
-		Canvas canvas = new Canvas(240, 360);
-		border.setCenter(canvas);
-		
-		tetrisgrid = new TetrisGrid(canvas);
+		MenuItem miSettings = new MenuItem("Settings");
+		miSettings.setOnAction(e->showSettings());
+		MenuItem miPause = new MenuItem("Pause");
+		miPause.setOnAction(e->{
+			pauseGame();
+			miPause.setText(paused?"Unpause":"Pause");});
+		menuGame.getItems().addAll(miNewGame, miSettings, miPause);
+				
+		tetrisgrid = new TetrisGrid();
+		border.setCenter(tetrisgrid);
 		drawer = tetrisgrid.getGridDrawer();
 		drawer.drawGrid();
 		
@@ -80,6 +85,22 @@ public class Tetris extends Application
 		drawTimer.schedule(new drawLoop(), 0, 15);
 	}
 	
+	public void pauseGame()
+	{
+		if (!isRunning)	return;
+		if (!paused) {
+			drawTimer.cancel();
+			gameTimer.cancel();
+			paused = true;
+		}
+		else {
+			drawTimer = new Timer();
+			drawTimer.schedule(new drawLoop(), 0, 15);
+			setSpeed(speed);
+			paused = false;
+		}
+	}
+	
 	public void setSpeed(long s)
 	{
 		gameTimer.cancel();
@@ -91,13 +112,18 @@ public class Tetris extends Application
 	{
 		public synchronized void run()
 		{
-			drawer.draw();
+			try {
+				drawer.draw();
+			}
+			catch (ConcurrentModificationException cme) {
+				activeBlock.tempFix();
+			}
 		}
 	}
 	
 	private class GameLoop extends TimerTask
 	{
-		public void run()
+		public synchronized void run()
 		{
 			if (activeBlock == null) {
 				activeBlock = generateBlock();
@@ -111,6 +137,7 @@ public class Tetris extends Application
 				case GAMEOVER:
 					gameTimer.cancel();
 					drawTimer.cancel();
+					drawer.draw();
 					isRunning = false;
 					Platform.runLater(new Runnable() {
 					    @Override
@@ -124,8 +151,19 @@ public class Tetris extends Application
 					});
 					break;
 				default:
-				}				
+				}
 			}
+		}
+	}
+	
+	public void newBlock()
+	{
+		activeBlock = generateBlock();
+		speedtimer++;
+		if (speedtimer >= 25) {
+			speed = (long)(speed * 0.8);
+			setSpeed(speed);
+			speedtimer = 0;
 		}
 	}
 	
@@ -143,14 +181,8 @@ public class Tetris extends Application
 		}
 	}
 	
-	public void newBlock()
+	public void showSettings()
 	{
-		activeBlock = generateBlock();
-		speedtimer++;
-		if (speedtimer == 25) {
-			speed = (long)(speed * 0.8);
-			setSpeed(speed);
-			speedtimer = 0;
-		}
+		
 	}
 }

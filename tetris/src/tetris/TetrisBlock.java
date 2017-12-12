@@ -13,7 +13,7 @@ public abstract class TetrisBlock
 	public TetrisBlock(TetrisGrid tetrisgrid)
 	{
 		this.grid = tetrisgrid;
-		xPos = grid.getWidth()/2;
+		xPos = grid.getGridWidth()/2;
 		yPos = 0;
 	}
 	
@@ -124,5 +124,11 @@ public abstract class TetrisBlock
 		blockSize[2] = blockSize[3];
 		blockSize[3] = blockSize[1];
 		blockSize[1] = tmp;
+	}
+	
+	public void tempFix()
+	{
+		if (yPos > 0)
+			yPos--;
 	}
 }
