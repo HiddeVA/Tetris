@@ -1,5 +1,6 @@
 package tetris;
 
+import blocks.TetrisBlock;
 import javafx.scene.canvas.Canvas;
 
 public class TetrisGrid extends Canvas
@@ -17,9 +18,9 @@ public class TetrisGrid extends Canvas
 		gd = new GridDrawer(this.getGraphicsContext2D(), this.cols, this.rows);
 	}
 	
-	public TetrisGrid(int rows, int cols)
+	public TetrisGrid(double width, double height, int rows, int cols)
 	{
-		super(240, 360);
+		super(width, height);
 		this.rows = rows;
 		this.cols = cols;
 		grid = new boolean[cols][rows];
@@ -97,7 +98,7 @@ public class TetrisGrid extends Canvas
 		return result;
 	}
 	
-	private void removeRow(int row)
+	private synchronized void removeRow(int row)
 	{
 		for (int k = row; k > 1; k--) {
 			for (int j = 0; j < cols; j++) {

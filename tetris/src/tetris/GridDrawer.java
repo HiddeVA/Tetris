@@ -36,6 +36,11 @@ public class GridDrawer
 		cols = 10; rows = 17;
 	}
 	
+	public void setBlockSize(double size)
+	{
+		this.size = size;
+	}
+	
 	public void drawGrid()
 	{
 		gc.setFill(Color.WHITE);
